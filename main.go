@@ -6,12 +6,16 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
+	"runtime/pprof"
 	"sync"
 	"syscall"
 	"time"
 )
 
 func main() {
+	pprof.StartCPUProfile(os.Stdout)
+	defer pprof.StopCPUProfile()
+
 	// Below is an example of using our PrintMemUsage() function
 	// Print our starting memory usage (should be around 0mb)
 	PrintMemUsage()
@@ -29,6 +33,8 @@ func main() {
 		runtime.GC()
 		PrintMemUsage()
 	}()
+
+	var counter int
 
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -49,6 +55,12 @@ func main() {
 			// Print our memory usage at each interval
 			PrintMemUsage()
 			time.Sleep(time.Second)
+
+			if counter%10 == 0 {
+				overall = nil
+			}
+
+			counter++
 		}
 	}(finish)
 
